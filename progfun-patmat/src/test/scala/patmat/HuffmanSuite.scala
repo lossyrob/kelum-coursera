@@ -58,13 +58,10 @@ class HuffmanSuite extends FunSuite {
       assert( decode(t1, List(0,1)) === "ab".toList)
     }
   }
-  println(secret.length)
-  println(decode(frenchCode, secret).toString)
-  println(encode(frenchCode)(List('h', 'u', 'f', 'f', 'm', 'a', 'n', 'e', 's', 't', 'c', 'o', 'o', 'l')).length)
   
-  test("encode franchCode secret bit list"){
+  test("decode bcd from bit list"){
     new TestTrees{
-      assert(encode(frenchCode)(List('h', 'u', 'f', 'f', 'm', 'a', 'n', 'e', 's', 't', 'c', 'o', 'o', 'l')) === secret)
+      assert(decode(test1, (encode(test1)("bcd".toList))) === "bcd".toList)
     }
   }
   
