@@ -76,7 +76,7 @@ object Huffman {
    */
   def times(chars: List[Char]): List[(Char, Int)] = chars match {
     case Nil => Nil
-    case y :: ys => (y, (chars filter (x => x == y)) length) :: times(chars filterNot (x => x == y))
+    case y :: ys => (y, (chars.filter (x => x == y)).length) :: times(chars.filterNot (x => x == y))
   }
 
   /**
@@ -262,8 +262,13 @@ object Huffman {
             else Nil
     
           case Fork(l, r, c, w) =>
-            encodeIter(l, 0 :: bits, t) ::: encodeIter(r, 1 :: bits, t)
+            encodeIter(l, 0 :: bits, t).reverse ::: encodeIter(r, 1 :: bits, t).reverse
         }
+        
+        if (text.isEmpty)
+          Nil
+        else
+          encodeIter(tree, List(), text.head) ::: encode(tree)(text.tail)
     
 //            def encodeBits(charList: List[Char]): List[Bit] = {
 //              if (charList.isEmpty)
@@ -274,10 +279,6 @@ object Huffman {
 //            
 //            encodeBits(text)
     
-        if (text.isEmpty)
-          Nil
-        else
-          encodeIter(tree, List(), text.head) ::: encode(tree)(text.tail)
   }
 
   // Part 4b: Encoding using code table
