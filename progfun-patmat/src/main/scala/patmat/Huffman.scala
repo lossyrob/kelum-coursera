@@ -76,7 +76,7 @@ object Huffman {
    */
   def times(chars: List[Char]): List[(Char, Int)] = chars match {
     case Nil => Nil
-    case y :: ys => (y, (chars.filter (x => x == y)).length) :: times(chars.filterNot (x => x == y))
+    case y :: ys => (y, (chars.filter(x => x == y)).length) :: times(chars.filterNot(x => x == y))
   }
 
   /**
@@ -88,23 +88,23 @@ object Huffman {
    */
   def makeOrderedLeafList(freqs: List[(Char, Int)]): List[Leaf] = {
 
-    //    def mSort(list: List[(Char, Int)]): List[(Char, Int)] = {
-    //      val n = list.length / 2
-    //      if (n == 0) list
-    //      else {
-    //        def merge(xs: List[(Char, Int)], ys: List[(Char, Int)]): List[(Char, Int)] = (xs, ys) match {
-    //          case (Nil, ys) => ys
-    //          case (xs, Nil) => xs
-    //          case (x :: xs1, y :: ys1) =>
-    //            if (x._2 < y._2) x :: merge(xs1, ys)
-    //            else y :: merge(xs, ys1)
-    //        }
-    //        
-    //        val (frst,secnd) = list splitAt(n)
-    //        merge(mSort(frst), mSort(secnd))
-    //      }
-    //    }
-    //    val sortedList = mSort(freqs)
+        def mSort(list: List[(Char, Int)]): List[(Char, Int)] = {
+          val n = list.length / 2
+          if (n == 0) list
+          else {
+            def merge(xs: List[(Char, Int)], ys: List[(Char, Int)]): List[(Char, Int)] = (xs, ys) match {
+              case (Nil, ys) => ys
+              case (xs, Nil) => xs
+              case (x :: xs1, y :: ys1) =>
+                if (x._2 < y._2) x :: merge(xs1, ys)
+                else y :: merge(xs, ys1)
+            }
+            
+            val (frst,secnd) = list splitAt(n)
+            merge(mSort(frst), mSort(secnd))
+          }
+        }
+        val sortedList = mSort(freqs)
 
     def makeLeaf(xs: List[(Char, Int)]): List[Leaf] = {
       if (xs.isEmpty) Nil
@@ -112,7 +112,7 @@ object Huffman {
         Leaf(xs.head._1, xs.head._2) :: makeLeaf(xs.tail)
       }
     }
-    val sortedList = freqs.sortWith((x, y) => x._1 < y._1)
+    //val sortedList = freqs.sortWith((x, y) => x._2 < y._2)
     makeLeaf(sortedList)
   }
 
@@ -200,7 +200,9 @@ object Huffman {
           c :: decodeIter(tree, bitList)
 
       case Fork(l, r, c, w) =>
-        if (bitList.head == 0)
+        if (bitList.isEmpty)
+          Nil
+        else if (bitList.head == 0)
           decodeIter(l, bitList.tail)
         else if (bitList.head == 1)
           decodeIter(r, bitList.tail)
@@ -238,47 +240,21 @@ object Huffman {
    */
   def encode(tree: CodeTree)(text: List[Char]): List[Bit] = {
 
-//    def iter(cTree: CodeTree, char: Char): List[Bit] = cTree match {
-//      case Leaf(c, w) =>
-//        if (c == char)
-//          List()
-//        else
-//          Nil
-//
-//      case Fork(l, r, c, w) =>
-//        (0 :: iter(l, char)) ::: (1 :: iter(r, char))
-//
-//    }
-//
-//    if (text.isEmpty)
-//      Nil
-//    else
-//      iter(tree, text.head)
+    def encodeIter(hTree: CodeTree, bits: List[Bit], t: Char): List[Bit] = hTree match {
+      case Leaf(c, w) =>
+        if (c == t)
+          bits.reverse
+        else Nil
 
-        def encodeIter(hTree: CodeTree, bits: List[Bit], t: Char): List[Bit] = hTree match {
-          case Leaf(c, w) =>
-            if (c == t)
-              bits
-            else Nil
-    
-          case Fork(l, r, c, w) =>
-            encodeIter(l, 0 :: bits, t).reverse ::: encodeIter(r, 1 :: bits, t).reverse
-        }
-        
-        if (text.isEmpty)
-          Nil
-        else
-          encodeIter(tree, List(), text.head) ::: encode(tree)(text.tail)
-    
-//            def encodeBits(charList: List[Char]): List[Bit] = {
-//              if (charList.isEmpty)
-//                Nil
-//              else
-//                encodeIter(tree, List(), charList.head) ::: encodeBits(charList.tail)
-//            }
-//            
-//            encodeBits(text)
-    
+      case Fork(l, r, c, w) =>
+        encodeIter(l, 0 :: bits, t) ::: encodeIter(r, 1 :: bits, t)
+    }
+
+    if (text.isEmpty)
+      Nil
+    else
+      encodeIter(tree, List(), text.head) ::: encode(tree)(text.tail)
+
   }
 
   // Part 4b: Encoding using code table
@@ -341,7 +317,7 @@ object Huffman {
     val table = convert(tree)
 
     def quickEncoder(t: List[Char]): List[Bit] = {
-      if (text.isEmpty)
+      if (t.isEmpty)
         List()
       else
         codeBits(table)(t.head) ::: quickEncoder(t.tail)
